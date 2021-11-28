@@ -5,65 +5,93 @@
 #define PRINCIPAL_MEMORY 64
 #define PAGES 8
 #define FRAMES 8
+#define NUMBER_PROCESSES 9
 
 
 typedef struct{
     int data;
+} Page;
+
+typedef struct{
     bool isUsed;
-} MemoryPosition;
+    int idProcess;
+    int posPage;
+} Frame;
 
 typedef struct{
     int id;
     int intialPosition;
-    int lastPosition;
+    int numPages;
     int dataAmount;
+    bool found;
 } Process;
 
-MemoryPosition *virtualMemo;
-MemoryPosition *principalMemo;
+Page *virtualMemo;
+Frame *principalMemo;
 Process processes[10];
 int lastPosition = 0;
-int spaceFree = 1024;
-int values[10] = {80, 44, 120, 200, 110, 22, 150, 98, 78, 122};
+int values[NUMBER_PROCESSES] = {80, 44, 120, 200, 110, 22, 150, 98, 78};
 
 void saveProcess(Process process){
-    printf("%d\n", process.id);
-    for(int i = 0; i < process.dataAmount; i++){
-        virtualMemo[lastPosition + i + 1].data = i*10;
-        virtualMemo[lastPosition + i + 1].isUsed = true;
-        printf("%d %d %d\n",lastPosition + i, virtualMemo[i].data, virtualMemo[i].isUsed);
+    for(int i = 0; i < process.numPages; i++){
+        virtualMemo[lastPosition + i].data = 10;
+        printf("%d %d \n",lastPosition + i, virtualMemo[i].data);
     }
-    lastPosition += process.dataAmount;
-    spaceFree -= process.dataAmount; 
+    lastPosition += process.numPages;
+}
+
+int verifyNumberOfPages(int dataAmount){
+    if(dataAmount % PAGES == 0){
+        return dataAmount / PAGES;
+    }
+
+    return (dataAmount / PAGES) + 1;
 }
 
 Process newProcess(int id, int dataAmount){
     Process process;
     process.id = id;
     process.intialPosition = lastPosition;
-    process.lastPosition = lastPosition + dataAmount;
+    process.numPages = verifyNumberOfPages(dataAmount);
     process.dataAmount = dataAmount;
+    process.found = false;
     return process;
 }
 
 void populateProcess(){
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
         processes[i] = newProcess(i, values[i]);
+        printf("process = %d\n",processes[i].id);
         saveProcess(processes[i]);
     }
 }
 
-Process findProcess(int id){
+Process findProcessById(int id){
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
+        if(processes[i].id == id){
+            processes[id].found = true;
+            return processes[id];
+        }
+    }
+    return processes[id];
+}
+
+void mapVirtualToPrincipal(){
+    Process process = findProcessById(5);
+    if(process.found){
+        printf("Processo encontrado %d\n", process.intialPosition);
+        process.found = false;        
+    }else{
+        printf("Processo nao encontrado\n");
+    }
 }
 
 int main(){
-    int page;
-    virtualMemo = (MemoryPosition *) malloc(sizeof(MemoryPosition) * (VIRTUAL_MEMORY / PAGES));
-    principalMemo = (MemoryPosition *) malloc(sizeof(MemoryPosition) * (PRINCIPAL_MEMORY / FRAMES));
+    virtualMemo = (Page *) malloc(sizeof(Page) * (VIRTUAL_MEMORY / PAGES));
+    principalMemo = (Frame *) malloc(sizeof(Frame) * (PRINCIPAL_MEMORY / FRAMES));
 
     populateProcess();
-
-
+    mapVirtualToPrincipal();
 
     free(virtualMemo);
     free(principalMemo);
