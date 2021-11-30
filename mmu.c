@@ -33,6 +33,15 @@ Process processes[10];
 int lastPosition = 0;
 int values[NUMBER_PROCESSES] = {80, 44, 120, 200, 110, 22, 150, 98, 78};
 
+void saveProcess(Process process);
+int verifyNumberOfPages(int dataAmount);
+Process newProcess(int id, int dataAmount);
+void populateProcess();
+Process findProcessById(int id);
+Process findProcessById(int id);
+void verifyPrincipalMemoryUsed(int id);
+void mapVirtualToPrincipal(int id);
+
 void saveProcess(Process process){
     for(int i = 0; i < process.numPages; i++){
         virtualMemo[lastPosition + i].data = 10;
@@ -79,18 +88,24 @@ Process findProcessById(int id){
     return processes[id];
 }
 
-void mapVirtualToPrincipal(){
-    Process process = findProcessById(3);
+void verifyPrincipalMemoryUsed(int id){
+    if(principalMemo[id].isUsed){
+        printf("memoria sendo utilizada\n");
+    }
+}
+
+void mapVirtualToPrincipal(int id){
+    Process process = findProcessById(id);
     if(process.found){
         printf("Processo encontrado %d\n", process.intialPosition);
         int count =0;
         while(process.intialPosition + count < process.lastPosition){
             for(int i = 0; process.intialPosition + count < process.lastPosition; i++){
                 if(i < (PRINCIPAL_MEMORY / FRAMES)){
+                    verifyPrincipalMemoryUsed(i);
                     principalMemo[i].posPage = virtualMemo[process.intialPosition + count].posPage;
                     principalMemo[i].isUsed = true;
                     printf("memoria principal id %d value %d\n", i, principalMemo[i].posPage);
-                    
                 }else{
                     break;
                 }
@@ -110,7 +125,8 @@ int main(){
     principalMemo = (Frame *) malloc(sizeof(Frame) * (PRINCIPAL_MEMORY / FRAMES));
 
     populateProcess();
-    mapVirtualToPrincipal();
+    mapVirtualToPrincipal(5);
+    mapVirtualToPrincipal(7);
 
     free(virtualMemo);
     free(principalMemo);
