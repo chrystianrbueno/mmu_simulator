@@ -10,17 +10,18 @@
 
 typedef struct{
     int data;
+    int posPage;
 } Page;
 
 typedef struct{
     bool isUsed;
-    int idProcess;
     int posPage;
 } Frame;
 
 typedef struct{
     int id;
     int intialPosition;
+    int lastPosition;
     int numPages;
     int dataAmount;
     bool found;
@@ -35,6 +36,7 @@ int values[NUMBER_PROCESSES] = {80, 44, 120, 200, 110, 22, 150, 98, 78};
 void saveProcess(Process process){
     for(int i = 0; i < process.numPages; i++){
         virtualMemo[lastPosition + i].data = 10;
+        virtualMemo[lastPosition + i].posPage = lastPosition + i;
         printf("%d %d \n",lastPosition + i, virtualMemo[i].data);
     }
     lastPosition += process.numPages;
@@ -53,6 +55,7 @@ Process newProcess(int id, int dataAmount){
     process.id = id;
     process.intialPosition = lastPosition;
     process.numPages = verifyNumberOfPages(dataAmount);
+    process.lastPosition = process.intialPosition + process.numPages; 
     process.dataAmount = dataAmount;
     process.found = false;
     return process;
@@ -77,10 +80,26 @@ Process findProcessById(int id){
 }
 
 void mapVirtualToPrincipal(){
-    Process process = findProcessById(5);
+    Process process = findProcessById(3);
     if(process.found){
         printf("Processo encontrado %d\n", process.intialPosition);
-        process.found = false;        
+        int count =0;
+        while(process.intialPosition + count < process.lastPosition){
+            for(int i = 0; process.intialPosition + count < process.lastPosition; i++){
+                if(i < (PRINCIPAL_MEMORY / FRAMES)){
+                    principalMemo[i].posPage = virtualMemo[process.intialPosition + count].posPage;
+                    principalMemo[i].isUsed = true;
+                    printf("memoria principal id %d value %d\n", i, principalMemo[i].posPage);
+                    
+                }else{
+                    break;
+                }
+                printf("memoria virtual %d %d\n",count, virtualMemo[process.intialPosition + count].posPage);
+                count ++;
+            }
+        }
+
+        process.found = false;
     }else{
         printf("Processo nao encontrado\n");
     }
