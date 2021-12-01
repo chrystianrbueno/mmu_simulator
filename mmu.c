@@ -37,6 +37,7 @@ void verifyPrincipalMemoryUsed(int id);
 void mapVirtualToPrincipal(int id);
 void menu();
 void showProcess();
+int verifyNextEmpty();
 
 Page *virtualMemo;
 Frame *principalMemo;
@@ -94,14 +95,29 @@ void verifyPrincipalMemoryUsed(int id){
     }
 }
 
+int verifyNextEmpty(){
+    int result = -1;
+    for (int i= 0 ; i < (PRINCIPAL_MEMORY / FRAMES); i ++){
+        if(!(principalMemo[i].isUsed)){
+            return i;
+        }
+    }
+    return result;
+}
+
 void mapVirtualToPrincipal(int id){
     Process process = findProcessById(id);
     if(process.found){
         int count = 0;
 
         printf("Processo %d encontrado\n", process.id);
+        int emptyValue = verifyNextEmpty();
+        if(emptyValue == - 1){
+            emptyValue = 0;
+        }
+
         while(process.intialPosition + count < process.lastPosition){
-            for(int i = 0; process.intialPosition + count < process.lastPosition; i++){
+            for(int i = emptyValue; process.intialPosition + count < process.lastPosition; i++){
                 if(i < (PRINCIPAL_MEMORY / FRAMES)){
                     verifyPrincipalMemoryUsed(i);
                     principalMemo[i].posPage = virtualMemo[process.intialPosition + count].posPage;
@@ -111,6 +127,7 @@ void mapVirtualToPrincipal(int id){
                 }else{
                     break;
                 }
+
                 count ++;
             }
         }
@@ -128,7 +145,6 @@ void showProcess(int id){
         printf("Processo %d\n", process.id);
         printf("Encontra-se na memoria virtual na posicao: %d\n", process.intialPosition);
         printf("Esta utilizando %d Pages\n", process.numPages);
-        printf("Conteúdo %d\n", virtualMemo[id].data);
     }else{
         printf("Processo nao encontrado\n");
     }
