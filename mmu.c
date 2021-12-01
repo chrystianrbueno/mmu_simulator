@@ -35,6 +35,8 @@ Process findProcessById(int id);
 Process findProcessById(int id);
 void verifyPrincipalMemoryUsed(int id);
 void mapVirtualToPrincipal(int id);
+void menu();
+void showProcess();
 
 Page *virtualMemo;
 Frame *principalMemo;
@@ -46,7 +48,6 @@ void saveProcess(Process process){
     for(int i = 0; i < process.numPages; i++){
         virtualMemo[lastPosition + i].data = 10;
         virtualMemo[lastPosition + i].posPage = lastPosition + i;
-        printf("Page %d - Value %d \n",lastPosition + i, virtualMemo[i].data);
     }
     lastPosition += process.numPages;
 }
@@ -73,7 +74,6 @@ Process newProcess(int id, int dataAmount){
 void populateProcess(){
     for(int i = 0; i < NUMBER_PROCESSES; i++){
         processes[i] = newProcess(i, values[i]);
-        printf("Processo %d\n",processes[i].id);
         saveProcess(processes[i]);
     }
 }
@@ -121,13 +121,57 @@ void mapVirtualToPrincipal(int id){
     }
 }
 
+
+void showProcess(int id){
+    Process process = findProcessById(id);
+    if(process.found){
+        printf("Processo %d\n", process.id);
+        printf("Encontra-se na memoria virtual na posicao: %d\n", process.intialPosition);
+        printf("Esta utilizando %d Pages\n", process.numPages);
+        printf("Conteúdo %d\n", virtualMemo[id].data);
+    }else{
+        printf("Processo nao encontrado\n");
+    }
+}
+
+void menu(){
+    int op;
+    int id;
+    do{
+        //system("clear");
+        printf("#####Menu#####\n");
+        printf("1- Detalhar Processo\n");
+        printf("2- Consumir Processo\n");
+        printf("0 - Sair\n");
+        printf("\n\n\n\n\n");
+        printf("Digite a opcao:  ");
+        scanf("%d",&op);
+        switch(op){
+            case 0:
+                    break;
+            case 1: 
+                    printf("Detalhar - Selecione o nome do Processo: ");
+                    scanf("%d",&id);
+                    showProcess(id);
+                    break;
+            case 2:
+                    printf("Consumir - Selecione o nome do Processo: ");
+                    scanf("%d",&id);
+                    mapVirtualToPrincipal(id);
+                    break;
+            default:
+                    printf("Opcao invalida\n");
+        }
+
+    }while(op != 0);
+}
+
 int main(){
     virtualMemo = (Page *) malloc(sizeof(Page) * (VIRTUAL_MEMORY / PAGES));
     principalMemo = (Frame *) malloc(sizeof(Frame) * (PRINCIPAL_MEMORY / FRAMES));
 
     populateProcess();
-    mapVirtualToPrincipal(5);
-    mapVirtualToPrincipal(7);
+    menu();
 
     free(virtualMemo);
     free(principalMemo);
