@@ -27,16 +27,17 @@ typedef struct{
     bool found;
 } Process;
 
-void saveProcess(Process process);
-int verifyNumberOfPages(int dataAmount);
 Process newProcess(int id, int dataAmount);
-void populateProcess();
 Process findProcessById(int id);
-Process findProcessById(int id);
-void verifyPrincipalMemoryUsed(int id);
-void mapVirtualToPrincipal(int id);
+void populateVirtualMemory();
 void menu();
+void saveProcess(Process process);
+void mapVirtualToPrincipal(int id);
 void showProcess();
+void verifyPrincipalMemoryUsed(int id);
+void listProcesses();
+void mapAllProcessToPrincipal();
+int verifyNumberOfPages(int dataAmount);
 int verifyNextEmpty();
 
 Page *virtualMemo;
@@ -44,22 +45,6 @@ Frame *principalMemo;
 Process processes[10];
 int lastPosition = 0;
 int values[NUMBER_PROCESSES] = {80, 44, 120, 200, 110, 22, 150, 98, 78};
-
-void saveProcess(Process process){
-    for(int i = 0; i < process.numPages; i++){
-        virtualMemo[lastPosition + i].data = 10;
-        virtualMemo[lastPosition + i].posPage = lastPosition + i;
-    }
-    lastPosition += process.numPages;
-}
-
-int verifyNumberOfPages(int dataAmount){
-    if(dataAmount % PAGES == 0){
-        return dataAmount / PAGES;
-    }
-
-    return (dataAmount / PAGES) + 1;
-}
 
 Process newProcess(int id, int dataAmount){
     Process process;
@@ -72,7 +57,15 @@ Process newProcess(int id, int dataAmount){
     return process;
 }
 
-void populateProcess(){
+void saveProcess(Process process){
+    for(int i = 0; i < process.numPages; i++){
+        virtualMemo[lastPosition + i].data = 10;
+        virtualMemo[lastPosition + i].posPage = lastPosition + i;
+    }
+    lastPosition += process.numPages;
+}
+
+void populateVirtualMemory(){
     for(int i = 0; i < NUMBER_PROCESSES; i++){
         processes[i] = newProcess(i, values[i]);
         saveProcess(processes[i]);
@@ -89,6 +82,15 @@ Process findProcessById(int id){
     return processes[id];
 }
 
+int verifyNumberOfPages(int dataAmount){
+    if(dataAmount % PAGES == 0){
+        return dataAmount / PAGES;
+    }
+
+    return (dataAmount / PAGES) + 1;
+}
+
+
 void verifyPrincipalMemoryUsed(int id){
     if(principalMemo[id].isUsed){
         printf("Processo %d utilizando o frame %d\n", principalMemo[id].nameProcess, id);
@@ -103,6 +105,17 @@ int verifyNextEmpty(){
         }
     }
     return result;
+}
+
+void listProcesses(){
+    printf("\n\n\n\n\n");
+    printf("Lista de Processos");
+    printf("\n\n");
+
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
+        printf("Processo %d\n", processes[i].id);
+    }
+    printf("\n\n\n\n\n");
 }
 
 void mapVirtualToPrincipal(int id){
@@ -132,7 +145,6 @@ void mapVirtualToPrincipal(int id){
             }
         }
 
-        process.found = false;
     }else{
         printf("Processo %d nao encontrado\n", process.id);
     }
@@ -142,11 +154,24 @@ void mapVirtualToPrincipal(int id){
 void showProcess(int id){
     Process process = findProcessById(id);
     if(process.found){
+        printf("\n");
         printf("Processo %d\n", process.id);
         printf("Encontra-se na memoria virtual na posicao: %d\n", process.intialPosition);
         printf("Esta utilizando %d Pages\n", process.numPages);
     }else{
+        printf("\n");
         printf("Processo nao encontrado\n");
+    }
+}
+
+
+void mapAllProcessToPrincipal(){
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
+        mapVirtualToPrincipal(i);
+        printf("\n\n\n\nPausado para visualizacao\n\n");
+        getchar();    
+        scanf("c\n");
+        system("clear");
     }
 }
 
@@ -154,26 +179,36 @@ void menu(){
     int op;
     int id;
     do{
-        //system("clear");
-        printf("#####Menu#####\n");
+        printf("\n#######################\n");
+        printf("\tMenu\n");
+        printf("\n");
         printf("1- Detalhar Processo\n");
         printf("2- Consumir Processo\n");
+        printf("3- Consumir Todos Processo\n");
         printf("0 - Sair\n");
         printf("\n\n\n\n\n");
         printf("Digite a opcao:  ");
         scanf("%d",&op);
+
+        system("clear");
         switch(op){
             case 0:
                     break;
-            case 1: 
-                    printf("Detalhar - Selecione o nome do Processo: ");
+            case 1:
+                    listProcesses();
+                    printf("Detalhar Processo: ");
                     scanf("%d",&id);
                     showProcess(id);
                     break;
             case 2:
-                    printf("Consumir - Selecione o nome do Processo: ");
+                    listProcesses();
+                    printf("Consumir Processo: ");
                     scanf("%d",&id);
                     mapVirtualToPrincipal(id);
+                    break;
+            case 3:
+                    printf("Consumindo todos Processos: ");
+                    mapAllProcessToPrincipal();
                     break;
             default:
                     printf("Opcao invalida\n");
@@ -186,7 +221,7 @@ int main(){
     virtualMemo = (Page *) malloc(sizeof(Page) * (VIRTUAL_MEMORY / PAGES));
     principalMemo = (Frame *) malloc(sizeof(Frame) * (PRINCIPAL_MEMORY / FRAMES));
 
-    populateProcess();
+    populateVirtualMemory();
     menu();
 
     free(virtualMemo);
