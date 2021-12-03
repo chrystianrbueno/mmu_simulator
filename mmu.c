@@ -31,7 +31,7 @@ Process newProcess(int id, int dataAmount);
 Process findProcessById(int id);
 void populateVirtualMemory();
 void menu();
-void saveProcess(Process process);
+void saveProcesses(Process process);
 void mapVirtualToPrincipal(int id);
 void showProcess();
 void verifyPrincipalMemoryUsed(int id);
@@ -43,9 +43,16 @@ int verifyNextEmpty();
 
 Page *virtualMemo;
 Frame *principalMemo;
-Process processes[10];
+Process processes[NUMBER_PROCESSES];
 int lastPosition = 0;
 int values[NUMBER_PROCESSES] = {80, 44, 120, 200, 110, 22, 150, 98, 78};
+
+void populateVirtualMemory(){
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
+        processes[i] = newProcess(i, values[i]);
+        saveProcesses(processes[i]);
+    }
+}
 
 Process newProcess(int id, int dataAmount){
     Process process;
@@ -58,7 +65,7 @@ Process newProcess(int id, int dataAmount){
     return process;
 }
 
-void saveProcess(Process process){
+void saveProcesses(Process process){
     for(int i = 0; i < process.numPages; i++){
         virtualMemo[lastPosition + i].data = 10;
         virtualMemo[lastPosition + i].posPage = lastPosition + i;
@@ -66,18 +73,11 @@ void saveProcess(Process process){
     lastPosition += process.numPages;
 }
 
-void populateVirtualMemory(){
-    for(int i = 0; i < NUMBER_PROCESSES; i++){
-        processes[i] = newProcess(i, values[i]);
-        saveProcess(processes[i]);
-    }
-}
-
 Process findProcessById(int id){
     for(int i = 0; i < NUMBER_PROCESSES; i++){
         if(processes[i].id == id){
-            processes[id].found = true;
-            return processes[id];
+            processes[i].found = true;
+            return processes[i];
         }
     }
     return processes[id];
@@ -149,6 +149,8 @@ void mapVirtualToPrincipal(int id){
     }else{
         printf("Processo %d nao encontrado\n", process.id);
     }
+
+    process.found = false;
 }
 
 
@@ -163,6 +165,7 @@ void showProcess(int id){
         printf("\n");
         printf("Processo nao encontrado\n");
     }
+    process.found = false;
 }
 
 
