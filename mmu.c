@@ -37,6 +37,7 @@ void showProcess();
 void verifyPrincipalMemoryUsed(int id);
 void listProcesses();
 void mapAllProcessToPrincipal();
+void clearPrincipalMemory();
 int verifyNumberOfPages(int dataAmount);
 int verifyNextEmpty();
 
@@ -175,6 +176,19 @@ void mapAllProcessToPrincipal(){
     }
 }
 
+void clearPrincipalMemory(){
+    int countFalse = 0;
+    for(int i = 0; i < NUMBER_PROCESSES; i++){
+        if(!principalMemo[i].isUsed){
+            countFalse++;
+        }
+        principalMemo[i].isUsed = false;
+    }    
+    if(countFalse == NUMBER_PROCESSES){
+        printf("\nMemoria ja esta vazia\n\n");
+    }
+}
+
 void menu(){
     int op;
     int id;
@@ -185,6 +199,7 @@ void menu(){
         printf("1- Detalhar Processo\n");
         printf("2- Consumir Processo\n");
         printf("3- Consumir Todos Processo\n");
+        printf("4- Limpar Memoria Principal\n");
         printf("0 - Sair\n");
         printf("\n\n\n\n\n");
         printf("Digite a opcao:  ");
@@ -207,8 +222,12 @@ void menu(){
                     mapVirtualToPrincipal(id);
                     break;
             case 3:
-                    printf("Consumindo todos Processos: ");
+                    printf("Consumindo todos Processos");
                     mapAllProcessToPrincipal();
+                    break;
+            case 4:
+                    printf("Limpando Memoria Principal");
+                    clearPrincipalMemory();
                     break;
             default:
                     printf("Opcao invalida\n");
